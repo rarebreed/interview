@@ -1,5 +1,9 @@
 /**
  * Check to see if one string is an anagram of another string
+ * 
+ * Basically this is a counting strategy.  Uses a map where the key is a letter, and the value is
+ * the number of occurrences.  A word is an anagram of another word if each letter in one map exists
+ * in the other map, and there are at least as many occurrences in the other map
  */
 
 const isAnagram = (s1: string, s2: string): boolean => {
