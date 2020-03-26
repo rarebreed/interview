@@ -8,7 +8,7 @@ export class Stack<T> {
 
   constructor(start: T[] = []) {
     this.#stack = start;
-    this.#top = -1;
+    this.#top = this.#stack.length -1;
   }
 
   push = (elm: T) => {

@@ -1,67 +1,130 @@
 /**
  * This code will check to see if there is a balanced set of parens, brackets or braces in a string
  * 
- * We use a stack here.  Every time we see an open symbol (, [, { we push it onto a stack.  When we
- * see the closing brace, we pop it off the stack.  If we have leftovers in the stack, or the stack
- * is empty and we get a closing symbol ), ], }, then we know it's not balanced
+ * This is actually more complicated than it seems once you add extra container types.  The trick is
+ * to use a stack of stacks.  
  */
 import { Stack } from "../structures/stack";
 
 type Symbol = "(" | "{" | "[";
 
-export const balancer = (test: string) => {
-  let parensStack = new Stack<string>();
-  let braceStack = new Stack<string>();
-  let bracketStack = new Stack<string>();
-  let stack = new Stack<Stack<string>>()
+const matchSymToClose = (sym: string) => {
+  switch (sym) {
+    case "}":
+      return "{";
+    case "]":
+      return "[";
+    case ")":
+      return "(";
+    default:
+      return null
+  }
+}
 
-  for(const item of test) {
-    switch (item) {
-      case "(":
-        parensStack.push(item)
-        break;
-      case ")":
-        if (parensStack.isEmpty()) {
-          return false;
-        }
-        if (!bracketStack.isEmpty() || !braceStack.isEmpty()) {
-          console.error("There is an open bracket or brace")
-          return false;
-        }
-        parensStack.pop()
-        break;
-      case "[":
-        bracketStack.push(item);
-        break;
-      case "]":
-        if (bracketStack.isEmpty()) {
-          return false;
-        }
-        if (!parensStack.isEmpty() || !braceStack.isEmpty()) {
-          console.error("There is an open brace or parens")
-          return false;
-        }
-        bracketStack.pop()
-        break;
-      case "{":
-        braceStack.push(item)
-        break;
-      case "}":
-        if (braceStack.isEmpty()) return false
-        if (!bracketStack.isEmpty() || !parensStack.isEmpty()) {
-          console.error("There is an open bracket or parens")
-          return false;
-        }
-        braceStack.pop()
-        break;
-      default:
-        continue
+export const balancer = (test: string) => {
+  let stack = new Stack<Stack<string>>();
+
+  const getCurrentStackType = () => {
+    let currentStack = stack.peek();
+    if (currentStack) {
+      let currentSymb = currentStack.peek();
+      if (currentSymb) {
+        return [currentSymb, currentStack] as [string, Stack<string>]
+      }
+    } else {
+      console.log("Empty stack ", stack.isEmpty())
     }
   }
 
-  return parensStack.isEmpty()
+  /**
+   * Find out what our current stack is.  Then check the following:
+   * - Check if the stack is empty.
+   *   - If it is, add a new stack of appropriate type
+   * - Find out what our [symbol, currentStack] types are
+   * - Check current symbol
+   *   - If current symbol is an open symbol:
+   *     - Compare the currentStack type
+   *       - If current symbol same as stack type, push to current
+   *       - If they are different, add new stack of sym type to stack
+   *   - If current symbol is a close symbol
+   *     - Compare to the currentStack type
+   *       - If they are matching types, pop the currentStack
+   *         - if the currentStack is empty, stack.pop() to remove current
+   *       - If it's different, return false
+   */
+  const checkSymbol = (sym: string) => {
+    if (stack.isEmpty()) {
+      stack.push(new Stack([sym]));
+    } else {
+      // Find what our current stack is
+      let current = getCurrentStackType();
+      if (current) {
+        let [symbol, currStack] = current;
+        // Check if we have an opening symbol
+        if ("({[".includes(sym)) {
+          if (sym === symbol) {
+            currStack.push(sym)
+          } else {
+            stack.push(new Stack([sym]))
+          }
+        } else if (")}]".includes(sym)) { // Check if we have closing symbol
+          if (matchSymToClose(sym) === symbol) {
+            currStack.pop();
+            if (currStack.isEmpty()) {
+              stack.pop();
+            }
+          } else {
+            return "Error"
+          }
+        }
+      } else {
+        console.log("This shouldn't happen")
+      }
+    }
+  }
+
+  for(const item of test) {
+    if (checkSymbol(item) === "Error") {
+      return false;
+    }
+  }
+
+  // At this point if no more symbols.  If stack is empty return true, else false
+  return stack.isEmpty()
+}
+
+/**
+ * Simpler version where it only tests parens
+ */
+const parensChecker = (input: string) => {
+  const stack: string[] = []
+
+  const checkSym = (sym: string) => {
+    if (sym === "(") {
+      stack.push(sym)
+    } else if (sym === ")") {
+      if (stack.length <= 0) {
+        return "Error"
+      }
+      stack.pop()
+    }
+  }
+
+  for (const s of input) {
+    if (checkSym(s) === "Error") {
+      return false;
+    }
+  }
+
+  return stack.length === 0
 }
 
 const test = "( here ([ is a { test } that ] should) work)"
 const negtest = "( here ([ is a ) test { ] should) not work}"
-console.log(balancer(test))
+const negtest2 = "( here ([ is a { {  ) } } test { ] should) not work}"
+const test2 = "( here ([ [] {{ ([ () ]) } ()} is a { test } that ] should) work)"
+console.log(balancer(negtest2))
+
+const testp = "(())(()())";
+const testpneg = "(())())"
+console.log(parensChecker(testpneg));
