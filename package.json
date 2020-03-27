@@ -6,13 +6,14 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "ava"
   },
   "keywords": [],
   "author": "Sean Toner",
   "license": "Apache-2.0",
   "devDependencies": {
-    "ava": "2.4.0",
+    "ava": "^3.5.1",
     "rimraf": "^3.0.0",
     "ts-lint": "4.5.1",
     "typescript": "^3.8.3"

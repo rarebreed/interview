@@ -9,6 +9,10 @@
  *   - Check if next item is less than either of the two elements
  *   - If less than 3 elements, save it
  *   - If next item is larger than either 2 elements, store it in 
+ * 
+ * export const test = [ 10, 2, 2, 9, 6, 3 ];
+
+console.log(productof3(test));
  */
 
 const productof3 = (arr: number[]) => {
@@ -42,7 +46,3 @@ const productof3 = (arr: number[]) => {
 
 	return max3;
 }
-
-export const test = [ 10, 2, 2, 9, 6, 3 ];
-
-console.log(productof3(test));

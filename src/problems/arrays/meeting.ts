@@ -30,7 +30,7 @@
  * 
  */
 
-interface Meeting {
+export interface Meeting {
 	start: number, 
 	end: number
 }
@@ -40,16 +40,16 @@ export const mergeMeetings = (arr: Meeting[]): Meeting[] => {
 	let final = [arr[0]]; // container of our merged meeting times
 
 	while(index < arr.length -1) {
-		console.log(`index now ${index}`)
+		// console.log(`index now ${index}`)
 		let first = final[final.length - 1]; // compare last element in final
 		let second = arr[index + 1]          // with next element in arr
 
-		console.log(`first = ${JSON.stringify(first, null, 2)}`);
-		console.log(`second = ${JSON.stringify(second, null, 2)}`);
+		// console.log(`first = ${JSON.stringify(first, null, 2)}`);
+		// console.log(`second = ${JSON.stringify(second, null, 2)}`);
 
 		if (second.start <= first.end) {
 			first.end = Math.max(first.end, second.end);
-			console.log(`Second begins less than first ends`);
+			// console.log(`Second begins less than first ends`);
 		} else {
 			final.push(second);
 		}
@@ -59,19 +59,3 @@ export const mergeMeetings = (arr: Meeting[]): Meeting[] => {
 
   return final
 }
-
-export const test = [
-  { start: 0,  end: 1 },
-  { start: 3,  end: 5 },
-  { start: 4,  end: 8 },
-  { start: 10, end: 12 },
-	{ start: 9,  end: 10 },
-	{ start: 5,  end: 7},
-	
-]
-
-let sorted = test.sort((a, b) => {
-	return a.start - b.start
-})
-let result = mergeMeetings(sorted);
-console.log(JSON.stringify(result, null, 2));

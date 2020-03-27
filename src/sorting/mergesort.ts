@@ -43,7 +43,7 @@ const merge = <T>(left: T[], right: T[], compareFn: ICompareFn<T>) => {
  * @param array 
  * @param compareFn 
  */
-const mergeSort = <T>(array: T[], compareFn: ICompareFn<T>) => {
+export const mergeSort = <T>(array: T[], compareFn: ICompareFn<T>) => {
 	//console.log("Going to split array", array)
   if (array.length > 1) { // {1}
     const { length } = array;
@@ -56,12 +56,3 @@ const mergeSort = <T>(array: T[], compareFn: ICompareFn<T>) => {
   }
   return array; 
 }
-
-
-
-export const testVals = makeNumbers(10);
-console.log("unsorted", testVals)
-
-let sorted = mergeSort(testVals, defaultCompare);
-
-console.log("sorted", sorted);

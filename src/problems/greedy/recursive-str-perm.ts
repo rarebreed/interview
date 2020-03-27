@@ -45,7 +45,7 @@
  * function, we concatenate the results back
  */
 
-const permutations = (arr: string[]) => {
+export const permutations = <T>(arr: T[]) => {
 	if (arr.length == 2) {
 		let [first, second] = arr;
 		let baseArray = [];
@@ -58,8 +58,9 @@ const permutations = (arr: string[]) => {
 		// So, when we walk "down", we hit out base case which returns 2 elements
 		// This then gets concatenated with the first character, and then this merged result 
 		// is returned.
-		let merged: string[][] = [];
+		let merged: T[][] = [];
 		for(let i = 0; i < arr.length; i++) {
+			// "reduce" our array into a smaller array
 			let subarr = arr.slice(0, i).concat(arr.slice(i+1));
 			let pulled = arr[i];
 			let base = permutations(subarr);
@@ -71,20 +72,3 @@ const permutations = (arr: string[]) => {
 		return merged
 	}
 }
-
-export const test = "shazam".split("");
-let res = permutations(test);
-
-const contains = (search: string[], test: string[]) => {
-	let i = 0;
-	let searchInd = 0;
-	while(test[i] !== search[searchInd] && i < test.length) {
-		i++
-	}
-
-	for(i; i < test.length; i++) {
-		
-	}
-}
-
-

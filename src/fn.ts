@@ -10,20 +10,28 @@ export function* range(
 	start: number = 0,
 	inc: number = 1
 ): Generator<number> {
-	while (start <= end) {
+	while (start < end) {
 		yield start;
 		start += inc;
 	}
 }
 
-export const take = <T>(gen: Iterable<T>) => (amt: number) => {
+export const take = <T>(iter: Iterable<T>) => (amt: number) => {
 	let start = 0;
 	let result: T[] = [];
-	for(const val of gen) {
-		if (start > amt) break
-		result.push(val);
+
+	let gen = iter[Symbol.iterator]();
+	
+	while (amt > start) {
+		let item = gen.next();
 		start++;
+		if (!item.done) {
+			result.push(item.value)
+		} else {
+			break;
+		}
 	}
+
 	return result;
 }
 
@@ -90,4 +98,130 @@ export const display = <T>(arr: T[]) => {
   for(const [i, val] of zipped) {
 		console.log(`${i}: ${val}`)
 	}
+}
+
+/**
+ * Takes an iterable (eg, an array or generator) and returns a pairwise tuple of elements.
+ * 
+ * For example:
+ * 
+ * ```typescript
+ * let paired = pair([1, 2, 3])  // [[1, 2], [2, 3]]
+ * ```
+ */
+export const pair = <T>(iter: Iterable<T>) => {
+	let gen = toGen(iter);
+
+	// Collect the first 2
+	let results: [T, T][] = [];
+	let [first, second] = take(gen)(2);
+	// Remember the second result, as it will become the first element of the next
+	let last = second;
+
+	// If we don't have at least 2 elements, don't add to results
+	if (first && second) {
+		results.push([first, second]);
+	}
+
+	while (true) {
+		// Take next item
+		let [next] = take(gen)(1);
+		if (!next) {
+			break;
+		}
+
+		results.push([last, next]);
+		last = next;
+	}
+
+	return results;
+}
+
+/**
+ * Divide one array, into sub arrays.
+ * 
+ * Example
+ * 
+ * ```typescript
+ * chunk([1, 2, 3, 4, 5, 6, 7, 8, 9], 2) // => [[1, 2], [3, 4], [5, 6], [7, 8]]
+ * ```
+ * 
+ * @param arr 
+ * @param size 
+ */
+export const chunk = <T>(arr: T[], size: number) => {
+	let container = [];
+	for(let i = 0; i < arr.length; i+=size) {
+		let subarray = [];
+		for(let inner = 0; inner < size; inner++ ) {
+			if ((i + inner) > arr.length -1) {
+				break
+			}
+			subarray.push(arr[i + inner])
+		}
+		container.push(subarray)
+	}
+	return container
+}
+
+export const reverse = <T>(arr: T[], start?: number, last?: number) => {
+	if (!start) {
+		start = 0;
+	}
+
+	if (!last) {
+		last = arr.length - 1;
+	}
+
+	const checkIndex = (ind: number, msg: string) => {
+		if (ind >= arr.length) {
+			throw new Error(msg)
+		}
+	}
+	checkIndex(start, `start[${start}] can't be greater than array length of ${arr.length}`);
+	checkIndex(last, `start[${last}] can't be greater than array length of ${arr.length}`);
+
+  while (start < last) {
+		// swap first with last
+		[arr[start], arr[last]] = [arr[last], arr[start]]
+    
+		start++;
+		last--;
+	}
+
+	return arr;
+}
+
+export namespace Utils {
+	export const factorial = (n: number, acc?: number): number => {
+		if (!acc) {
+			acc = 1
+		}
+
+		if (n === 0) return acc;
+		if (n < 0) throw new Error("n must be >= 0");
+
+		acc = acc * n;
+		return factorial(n - 1, acc);
+	}
+
+	export const dumbFib = (n: number): number => {
+		if (n < 1) return 0 
+		if (n <= 2) return 1
+
+		return dumbFib(n - 1) + dumbFib(n - 2)
+	}
+
+  export function fibMem(n: number) {
+		if (n < 1) { return 0; }
+		const memo = [0, 1];
+
+		const fibonacciMem = (num: number): number => {
+			if (memo[num] != null) return memo[num];
+			memo[num] = fibonacciMem(num - 1) + fibonacciMem(num - 2);
+			return memo[num]
+		};
+		return fibonacciMem(n);
+	}
+	
 }

@@ -9,12 +9,6 @@
  * 
  * Come up with code that will reverse the words _in place_
  * 
- * [
- *   "p", "r", "o", "b", "l", "e", "m", " ",
- *   "t", "h", e", " ",
- *   "s", "o", "l", "v", "e"
- * ]
- * 
  * 1. Reverse the characters
  * 2. Set start index to 0 and loop through array
  * 3. Find the index where a space is
@@ -56,7 +50,7 @@ export const reversedIndexes = (arr: Tuples[]) => {
 	}, [])
 }
 
-const reverseWords = (arr: string[]) => {
+export const reverseWords = (arr: string[]) => {
 	let reversed = reverse(arr);
 	console.log(reversed);
 

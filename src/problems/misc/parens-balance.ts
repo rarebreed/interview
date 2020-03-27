@@ -4,7 +4,7 @@
  * This is actually more complicated than it seems once you add extra container types.  The trick is
  * to use a stack of stacks.  
  */
-import { Stack } from "../structures/stack";
+import { Stack } from "../../structures/stack";
 
 type Symbol = "(" | "{" | "[";
 

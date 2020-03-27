@@ -11,7 +11,7 @@ const partition = (
   let i = left;
   let j = right;
 
-  console.log('pivot value is ' + pivot + '; left is ' + left + '; right is ' + right);
+  // console.log('pivot value is ' + pivot + '; left is ' + left + '; right is ' + right);
 
   // Check if the value at position i is less than our pivot _index_.  If it is, increment i and
   // repeat.  In other words, we are _squeezing_ towards the middle
@@ -38,8 +38,8 @@ const partition = (
     if (i <= j) {
       //console.log(`  swap array[${i}] = ${array[i]} with array[${j}] = ${array[j]}`);
       swap(array, i, j);
-      //console.log("array is now: ");
-      display(array);
+      // console.log("array is now: ");
+      // display(array);
       i++;
       j--;
     }
@@ -73,7 +73,7 @@ const part = <T>(
 
     if (i <= j) {
       swap(arr, i, j);
-      display(arr)
+      // display(arr)
       i++
       j--
     }
@@ -104,12 +104,12 @@ const quick = function(
     index = partition(array, left, right, compareFn);
 
     if (left < index - 1) {
-      console.log(`Sorting left`)
+      // console.log(`Sorting left`)
       quick(array, left, index - 1, compareFn);
     }
 
     if (index < right) {
-      console.log(`Sorting right`)
+      // console.log(`Sorting right`)
       quick(array, index, right, compareFn);
     }
   }
@@ -147,11 +147,3 @@ export const qsort = <T>(
 ) => {
   return qs(arr, 0, arr.length - 1, compareFn);
 }
-
-let unsorted = makeNumbers(10);
-console.log("Starting with");
-display(unsorted);
-
-let sorted = qsort(unsorted, defaultCompare)
-console.log("Sorted is now")
-display(sorted)
