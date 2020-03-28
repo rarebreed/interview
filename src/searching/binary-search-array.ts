@@ -1,4 +1,3 @@
-import { Fn } from "../fn";
 import { Compare, defaultCompare } from "../types/types";
 import { quickSort } from "../sorting/quicksort";
 
@@ -7,7 +6,7 @@ export const DOES_NOT_EXIST = -1;
 const binarySearchRecursive = <T>(
   array: T[],
   value: T, 
-  low: number, 
+  low: number, // We use low and high to measure a "slice" of the array
   high: number, 
   compareFn = defaultCompare
 ): number => {
@@ -20,7 +19,7 @@ const binarySearchRecursive = <T>(
     } else if (compareFn(element, value) === Compare.GREATER_THAN) { // {2}
       return binarySearchRecursive(array, value, low, mid - 1, compareFn);
     } else {
-      return mid; // {3}
+      return mid; 
     }
   }
   return DOES_NOT_EXIST; // {4}

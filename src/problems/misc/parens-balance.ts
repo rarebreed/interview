@@ -119,6 +119,45 @@ const parensChecker = (input: string) => {
   return stack.length === 0
 }
 
+enum Symbols {
+  LEFT_PAREN     = '(',
+  RIGHT_PAREN    = ')',
+  LEFT_BRACE     = '{',
+  RIGHT_BRACE    = '}',
+  LEFT_BRACKET   = '[',
+  RIGHT_BRACKET  = ']',
+}
+
+/**
+ * Simpler version
+ * 
+ * @param s 
+ */
+export const isBalanced = (s: string) => {
+  const stack = new Stack<string>();
+  for (let i of s) {
+    if (i == Symbols.LEFT_PAREN)   stack.push(Symbols.LEFT_PAREN);
+    if (i == Symbols.LEFT_BRACE)   stack.push(Symbols.LEFT_BRACE);
+    if (i == Symbols.LEFT_BRACKET) stack.push(Symbols.LEFT_BRACKET);
+
+    if (i == Symbols.RIGHT_PAREN) {
+        if (stack.isEmpty()) return false;
+        if (stack.pop() != Symbols.LEFT_PAREN) return false;
+    }
+
+    else if (i == Symbols.RIGHT_BRACE) {
+        if (stack.isEmpty()) return false;
+        if (stack.pop() != Symbols.LEFT_BRACE) return false;
+    }
+
+    else if (i == Symbols.RIGHT_BRACKET) {
+        if (stack.isEmpty()) return false;
+        if (stack.pop() != Symbols.LEFT_BRACKET) return false;
+    }
+  }
+  return stack.isEmpty();
+}
+
 const test = "( here ([ is a { test } that ] should) work)"
 const negtest = "( here ([ is a ) test { ] should) not work}"
 const negtest2 = "( here ([ is a { {  ) } } test { ] should) not work}"

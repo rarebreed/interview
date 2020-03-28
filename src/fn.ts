@@ -86,11 +86,49 @@ export class Fn {
 	}
 }
 
-export const makeNumbers = (amt: number) => {
-	return Fn.new()
-	   .range()
-		 .take(amt - 1)
-		 .map((_) => Math.floor(Math.random() * (amt + 1)))
+export interface MakeNumOptions {
+	negative?: boolean,
+	exclusive?: boolean,
+	range?: [number, number]
+}
+
+const defaultMakeNumOpts: MakeNumOptions = {
+	negative: false,
+	exclusive: false
+}
+
+export const makeNumbers = (amt: number, options: MakeNumOptions = defaultMakeNumOpts) => {
+	let start = 1;
+	let end = amt;
+	let { negative, exclusive } = options;
+	
+	console.log(options);
+	if (options.range !== undefined) {
+		[start, end] = options.range;
+	}
+
+	let total = end + 1 - start
+
+	let neg: number[] = [];
+	if (negative) {
+		neg = Fn.new()
+			.range(-start + 1, -end)
+			.take(total)
+	}
+
+	let rand = Fn.new()
+	   .range(end + 1, start)
+		 .take(total);
+	
+	rand = neg.concat(rand)
+
+	if (exclusive) {
+		shuffle(rand);
+	} else {
+		rand = rand.map((_) => Math.floor(Math.random() * ((end - start) + 1)) + start)
+	}
+
+	return take(rand)(amt)
 }
 
 export const display = <T>(arr: T[]) => {
@@ -183,13 +221,36 @@ export const reverse = <T>(arr: T[], start?: number, last?: number) => {
 
   while (start < last) {
 		// swap first with last
-		[arr[start], arr[last]] = [arr[last], arr[start]]
+		swap(arr, start, last)
     
 		start++;
 		last--;
 	}
 
 	return arr;
+}
+
+export const swap = <T>(arr: T[], idx1: number, idx2: number) => {
+	[arr[idx1], arr[idx2]] = [arr[idx2], arr[idx1]]
+}
+
+export const shuffle = <T>(array: T[]) => {
+	for(let i = array.length - 1; i > 0; i--) {
+		let randSlot = Math.floor(Math.random() * (i + 1))  // don't pick the last index
+		// swap last element with random slot
+		let lastElement = array[i];
+		let toSwap = array[randSlot];
+		array[i] = toSwap;
+		array[randSlot] = lastElement;
+	}
+}
+
+export const shuffle2 = <T>(array: T[]) => {
+	for(let i = array.length - 1; i > 0; i--) {
+		let randSlot = Math.floor(Math.random() * (i + 1))  // don't pick the last index
+		// swap last element with random slot
+		swap(array, i, randSlot);
+	}
 }
 
 export namespace Utils {
