@@ -18,7 +18,7 @@
  * 
  */
 
-import { reverse } from "./reverse";
+import { reverse } from "../../fn";
 
 type TupleOne = [number];
 type TupleTwo = [number, number];
@@ -36,12 +36,6 @@ export function* range(tup: Tuples) {
 	yield end;
 }
 
-export const test = [ 
-	"s", "o", "l", "v", "e", " ",
-	"t", "h", "e", " ",
-	"p", "r", "o", "b", "l", "e", "m"
-];
-
 export const reversedIndexes = (arr: Tuples[]) => {
 	return arr.reduce((acc: number[], r) => {
 		let newarr = Array.from(range(r));
@@ -51,17 +45,19 @@ export const reversedIndexes = (arr: Tuples[]) => {
 }
 
 export const reverseWords = (arr: string[]) => {
+	// 1. Reverse the individual characters
 	let reversed = reverse(arr);
-	console.log(reversed);
 
+	// 2. Start at 0 and loop through
 	let index = 0;
 	for(let i = 0; index < reversed.length; i++) {
+		// 3. Find a space character
 		if (reversed[i] === " " || i === reversed.length) {
+			// 4. Reverse the slice where index is our start, and i - 1 is our end
 			reverse(reversed, index, i -1);
+			// 5. Set index to i + 1 as this is our new subslice
 			index = i + 1;
 		}
 	}
 	return reversed;
 }
-
-console.log(reverseWords(test))

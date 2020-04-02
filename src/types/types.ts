@@ -8,6 +8,21 @@ export type ICompareFn<T> = (lhs: T, rhs: T) => Compare;
 
 export type IEqualsFunction<T> = (a: T, b: T) => boolean;
 
+export interface IComparable<T> {
+  compareTo: (left: T, right: T) => Compare
+}
+
+export class Comparable<T> {
+  val: T;
+
+  constructor(val: T) {
+    this.val = val
+  }
+
+  compareTo = (cmp: Comparable<T>) => {
+    return defaultCompare(this.val, cmp.val)
+  }
+}
 
 export function defaultCompare<T>(a: T, b: T): number {
   //console.log(`Comparing ${a} to ${b}`);

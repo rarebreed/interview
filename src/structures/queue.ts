@@ -97,8 +97,8 @@ export class Dequeue<T> extends Queue<T> {
 }
 
 /**
- * This is a special kind of Queue where the size is fixed.  This is opposite of a RingBuffer which
- * has LIFO properties.  
+ * This is a special kind of Queue where the size is fixed, and as you enqueue new people, it will
+ * "wrap" around (displacing)
  */
 class CircularQueue<T> extends Dequeue<T> {
   enqueue = () => {

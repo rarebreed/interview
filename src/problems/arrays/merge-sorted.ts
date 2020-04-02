@@ -2,7 +2,7 @@
  * Given 2 meetings (which are each sorted) return a single array of sorted elements
  */
 
- import { Compare, defaultCompare } from "../../types/types";
+import { Compare, defaultCompare } from "../../types/types";
 
 export const merge = <T>(left: T[], right: T[], compareFn = defaultCompare ) => {
 	let merged: T[] = [];
