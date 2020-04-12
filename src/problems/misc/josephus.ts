@@ -1,8 +1,8 @@
 import { Queue } from "../../structures/queue";
-import { Fn } from "../../fn";
+import { Range } from "../../fn";
 
 export const josephus = (start: number, rotate: number) => {
-  let q = new Queue(Fn.new().range().take(start))
+  let q = new Queue(Range.new().range().take(start))
   
   while (q.size() !== 1) {
     for (let i = 0; i < rotate - 1; i++) {

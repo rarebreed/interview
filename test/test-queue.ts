@@ -1,7 +1,7 @@
 import test from "ava";
 
 import { Queue, Dequeue } from "../src/structures/queue";
-import { Fn, toGen, take } from "../src/fn";
+import { Range, toGen, take } from "../src/fn";
 
 test("Tests Queue enque", (t) => {
   let q = new Queue<number>();
@@ -64,7 +64,7 @@ test("Checks emptied out Dequeue", (t) => {
   let size = dq.size();
   t.true(size === 3, "Incorrect size");
 
-  let iter = Fn.new().range().take(size);
+  let iter = Range.new().range().take(size);
   for (let i of iter) {
     let item = dq.removeBack();
     // console.log(item);

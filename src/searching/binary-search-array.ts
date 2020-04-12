@@ -14,9 +14,13 @@ const binarySearchRecursive = <T>(
     const mid = Math.floor((low + high) / 2);
     const element = array[mid];
 
-    if (compareFn(element, value) === Compare.LESS_THAN) { // {1}
+    // Compare our desired value, with the value at the midpoint
+    let compared = compareFn(value, element);
+    if (compared === Compare.GREATER_THAN) { 
+      // Our value greater than mid point, search to the right, by setting low to mid+1
       return binarySearchRecursive(array, value, mid + 1, high, compareFn);
-    } else if (compareFn(element, value) === Compare.GREATER_THAN) { // {2}
+    } else if (compared === Compare.LESS_THAN) {
+      // Our value less than mid point, search to the left by setting high to mid-1
       return binarySearchRecursive(array, value, low, mid - 1, compareFn);
     } else {
       return mid; 

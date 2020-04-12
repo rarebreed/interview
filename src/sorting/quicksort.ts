@@ -49,39 +49,6 @@ const partition = (
   return i;
 };
 
-const part = <T>(
-  arr: T[],
-  left: number,
-  right: number,
-  compareFn: ICompareFn<T>
-) => {
-  const pivot = arr[Math.floor((right + left) / 2)];
-  let i = left;
-  let j = right;
-
-  console.log('pivot value is ' + pivot + '; left is ' + left + '; right is ' + right);
-
-  while(i <= j) {
-    // Check left
-    while(compareFn(arr[i], pivot) === Compare.LESS_THAN) {
-      i++
-    }
-
-    while(compareFn(arr[j], pivot) === Compare.GREATER_THAN) {
-      j--
-    }
-
-    if (i <= j) {
-      swap(arr, i, j);
-      // display(arr)
-      i++
-      j--
-    }
-  }
-
-  return i;
-}
-
 /**
  * This is our divide function for sorting
  * 
@@ -119,6 +86,41 @@ const quick = function(
 export const quickSort = (array: any[], compareFn = defaultCompare) => {
   return quick(array, 0, array.length - 1, compareFn);
 };
+
+const part = <T>(
+  arr: T[],
+  left: number,
+  right: number,
+  compareFn: ICompareFn<T>
+) => {
+  const pivot = arr[Math.floor((right + left) / 2)];
+  let i = left;
+  let j = right;
+
+  console.log('pivot value is ' + pivot + '; left is ' + left + '; right is ' + right);
+
+  while(i <= j) {
+    // Check left
+    while(compareFn(arr[i], pivot) === Compare.LESS_THAN) {
+      i++
+    }
+
+    // Check Right
+    while(compareFn(arr[j], pivot) === Compare.GREATER_THAN) {
+      j--
+    }
+
+    // Compare and swap.  Increment left, decrement right
+    if (i <= j) {
+      swap(arr, i, j);
+      // display(arr)
+      i++
+      j--
+    }
+  }
+
+  return i;
+}
 
 const qs = <T>(
   arr: T[],

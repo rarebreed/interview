@@ -45,14 +45,18 @@ const merge = <T>(left: T[], right: T[], compareFn: ICompareFn<T>) => {
  */
 export const mergeSort = <T>(array: T[], compareFn: ICompareFn<T>) => {
 	//console.log("Going to split array", array)
-  if (array.length > 1) { // {1}
+  if (array.length > 1) { // 1. Base case is when the array is length 1
     const { length } = array;
-		const middle = Math.floor(length / 2); // {2}
+    const middle = Math.floor(length / 2); // 2. Get the midpoint so we can split
+    
 		//console.log("Going left")
-		const left = mergeSort(array.slice(0, middle), compareFn); // {3}
+    const left = mergeSort(array.slice(0, middle), compareFn); // 3. Split left
+    
 		//console.log("Going right")
-    const right = mergeSort(array.slice(middle, length), compareFn); // {4}
-    array = merge(left, right, compareFn); // {5}
+    const right = mergeSort(array.slice(middle, length), compareFn); // 4. Split right
+
+    //console.log("Merging left with right", left, right);
+    array = merge(left, right, compareFn); // 5. Combine
   }
   return array; 
 }

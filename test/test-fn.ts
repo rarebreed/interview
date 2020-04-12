@@ -1,6 +1,6 @@
 import test from "ava";
 
-import { Utils, toGen, Fn, zip, pair, reverse } from "../src/fn";
+import { Utils, toGen, Range, zip, pair, reverse } from "../src/fn";
 
 test("tests factorial", (t) => {
   let res = Utils.factorial(4);
@@ -31,7 +31,7 @@ test("toGen creates a generator of a non-empty array", (t) => {
 })
 
 test("Tests that take with a smaller value than rage results in correct size", (t) => {
-  let arr = Fn.new().range(3).take(2);
+  let arr = Range.new().range(3).take(2);
 
   t.true(arr.length === 2, `Size of array was ${arr.length}: ${arr}`)
 })

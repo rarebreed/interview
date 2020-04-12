@@ -36,6 +36,7 @@ export class Stack<T> {
 
   clear = () => {
     this.#stack = []
+    this.#top = 0;
   }
 
   size = () => {

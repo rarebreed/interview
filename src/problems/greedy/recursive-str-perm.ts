@@ -62,6 +62,7 @@ export const permutations = <T>(arr: T[]) => {
 		for(let i = 0; i < arr.length; i++) {
 			// "reduce" our array into a smaller array
 			let subarr = arr.slice(0, i).concat(arr.slice(i+1));
+
 			let pulled = arr[i];
 			let base = permutations(subarr);
 		  let newarr = base.map(str => {

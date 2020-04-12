@@ -1,6 +1,7 @@
 /**
  * Simple Queue data structure
  */
+import { Option, some, none } from "../fn";
 
 interface Items<T> {
   [key: number]: T
@@ -14,7 +15,7 @@ export class Queue<T> {
   constructor(start: T[] = []) {
     this.tail = 0;
     this.head = 0;
-    this.items = {}
+    this.items = {};
 
     start.forEach(i => {
       this.enqueue(i)

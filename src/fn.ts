@@ -3,8 +3,8 @@
  *
  * This is a more practical FP library that espouses speed over some purely FP concepts, like for
  * example, only using recursion instead of loops.  While recursion is great when it comes to
- * understanding an algorithm, many languages (javascript included) do not do tail call optimization
- * or elimination.
+ * understanding an algorithm, many languages (javascript included) are not guaranteed to do tail
+ * call optimization or elimination even though it's technically part of the spec.
  *
  * Moreover, as rust has shown, side effects can be controlled to some extent, even in the face of
  * mutation.  The great bane of side effects has been the inability to reason about state.  Rust
@@ -14,6 +14,14 @@
  *
  * Some concepts do not (yet) exist in rust, such as generators, but there are closely related
  * concepts like Streams.
+ * 
+ * This is just a catch-all library that grows organically as needed to solve algorithm and data
+ * structure problems.  Eventually, this library should probably be cleaned up.  The main goal of
+ * this library was to create these on my own, rather than use a pre-existing library like lodash or
+ * ramda.  Furthermore, an eventual goal is to port some of the functionality here to rust.  Some of
+ * these concepts are not necessary as rust already has them (for example, the Option class here is
+ * actually a semi-port of rust's Option type which in turn is a poor relation to Haskell Maybe type
+ * ).  However, things like Range will be converted to a rust stream.
  */
 
 /**
@@ -148,12 +156,12 @@ export const makeNumbers = (amt: number, options: MakeNumOptions = defaultMakeNu
 
 	let neg: number[] = [];
 	if (negative) {
-		neg = Fn.new()
+		neg = Range.new()
 			.range(-start + 1, -end)
 			.take(total)
 	}
 
-	let rand = Fn.new()
+	let rand = Range.new()
 	   .range(end + 1, start)
 		 .take(total);
 	
@@ -217,7 +225,7 @@ export const pair = <T>(iter: Iterable<T>) => {
 /**
  * Divide one array, into sub arrays.
  * 
- * Creates a new array, leaving the oringinal unmodified
+ * Creates a new array, leaving the original unmodified
  * 
  * Example
  * 
@@ -375,9 +383,13 @@ export namespace Utils {
 
 /**
  * The Kestrel combinator
+ * 
+ * One might ask what this is good for?  This is good for carrying along side effects.
+ * 
  * @param x 
  */
 const K = <T>(x: T) => (y: (x: T) => void) => {
+	y(x);
 	return x
 }
 
@@ -392,13 +404,14 @@ const I = <T>(x: T): T => {
 	return x
 }
 
-
+// End combinators
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * A simple class type that makes it easier to chain together functional operations by using a
  * Builder pattern
  */
-export class Fn {
+export class Range {
 	private gen: Generator<number> | null
 	private taken: number[]
 
@@ -408,7 +421,7 @@ export class Fn {
 	}
 
 	static new = () => {
-		return new Fn()
+		return new Range()
 	}
 
 	range = (end: number = Infinity, start: number = 0, inc: number = 1)=> {
@@ -423,4 +436,196 @@ export class Fn {
 		this.taken = take(this.gen)(amt);
 		return this.taken
 	}
+}
+
+interface Some<T> {
+	kind: "Some";
+	value: T
+}
+
+interface None {
+	kind: "None";
+	value: null
+}
+
+export const some = <T>(t: T): Some<T> => {
+	return {
+		kind: "Some",
+		value: t
+	}
+}
+
+export const none = (): None => {
+	return {
+		kind: "None",
+		value: null
+	}
+}
+
+export type Maybe<T> = Some<T> | None;
+
+/**
+ * An Option type to replace T | null
+ * 
+ * Unfortunately, typescript's union types aren't quite as nice as rust enums or haskell data types.
+ * We can't do pattern matching, and discriminated unions have a lot of "noise".  Also, we can't
+ * just construct data types like Some(10) or None.  At least we can chain together operations this
+ * way though.
+ */
+export class Option<T> {
+	#inner: Maybe<T>;
+
+	constructor(inner: Maybe<T>) {
+		this.#inner = inner
+	}
+
+	static new = <T>(inner: Maybe<T>) => {
+		return new Option(inner)
+	}
+
+	static None = <T>(): Option<T> => {
+		return Option.new(none())
+	}
+
+	static Some = <T>(t: T): Option<T> => {
+		return Option.new(some(t))
+	}
+
+	static Maybe = <T>(wrapped: T | null | undefined) => {
+		if (wrapped === null || wrapped === undefined) return Option.None<T>()
+		else return Option.Some(wrapped)
+	}
+
+	tap = (fn: (t: T) => void): Option<T> => {
+		switch (this.#inner.kind) {
+			case "None":
+				return this;
+			case "Some":
+				fn(this.#inner.value);
+				return this;
+		}
+	}
+
+	map = <R>(fn: (t: T) => R): Option<R> => {
+		switch (this.#inner.kind) {
+			case "None":
+				return new Option<R>(none())
+			case "Some":
+				let result = fn(this.#inner.value);
+				return Option.Some(result)
+		}
+	}
+
+	flatMap = <R>(fn: (t: T) => Option<R>): Option<R> => {
+		switch (this.#inner.kind) {
+			case "None":
+				return Option.None()
+			case "Some":
+				return fn(this.#inner.value);
+		}
+	}
+
+	lift = <R>(fn: <T, R>(t: Option<T>) => Option<R>): Option<R> => {
+		switch (this.#inner.kind) {
+			case "None":
+				return fn(Option.None())
+			case "Some":
+				return fn(Option.Some(this.#inner.value))
+		}
+	}
+
+	filter = (fn: (t: T) => boolean) => {
+		switch (this.#inner.kind) {
+			case "None":
+				return Option.None<boolean>();
+			case "Some":
+				return Option.Maybe(fn(this.#inner.value))
+		}
+	}
+
+	or = (other: Option<T> | T | null): Option<T> => {
+		switch (this.#inner.kind) {
+			case "None":
+				if (other instanceof Option) {
+					return other
+				}
+				if (other === null) {
+					return Option.None();
+				}
+				return Option.Some(other);
+			case "Some":
+				return this;
+		}
+	}
+
+	/**
+	 * If the inner value is null, call the supplied function, otherwise, just return the inner value
+	 *
+	 * The difference between this and mapOr, is that the fn passed to orElse must return an
+	 * Option<T>, whereas mapOr can have a function return Option<R>
+	 */
+	orElse = (fn: () => T | null) => {
+		switch (this.#inner.kind) {
+			case "None":
+				let result = fn();
+				if (result === null) {
+					return Option.None<T>()
+				} else {
+					return Option.Some(result)
+				}
+			case "Some":
+				return this;
+		}
+	}
+
+	/**
+	 * Takes a default value and a function
+	 *
+	 * If the inner type is null the function will take the default arg, and use it as the parameter
+	 * it will be called with.  Otherwise, use the inner value as the argument passed fn
+	 */
+	mapOr = <R>(other: T, fn: (t: T) => R | null): Option<R> => {
+		let result: R | null;
+		switch (this.#inner.kind) {
+			case "None":
+				result = fn(other);
+				break;
+			case "Some":
+				result = fn(this.#inner.value);
+				break;
+		}
+
+		if (result === null) {
+			return Option.None()
+		} else {
+			return Option.Some(result)
+		}
+	}
+
+	/**
+	 * Assumes that the inner value is not null and returns it
+	 * 
+	 * Will throw an error if the underlying value is null or undefined
+	 */
+	expect = (msg: string): T => {
+		switch (this.#inner.kind) {
+			case "None":
+				throw new Error(msg);
+			case "Some":
+				return this.#inner.value;
+		}
+	}
+
+	/**
+	 * Returns the underlying inner value
+	 */
+	unwrap = () => {
+		return this.#inner
+	}
+
+	isSome = () => this.#inner.kind !== "None";
+
+	isNone = () => this.#inner.kind === "Some";
+
+	kind = () => this.#inner.kind
 }

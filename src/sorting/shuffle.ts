@@ -1,4 +1,4 @@
-import { Fn } from "../fn";
+import { Range } from "../fn";
 
 export const shuffle = <T>(array: T[]) => {
 	for(let i = array.length - 1; i > 0; i--) {
@@ -11,7 +11,7 @@ export const shuffle = <T>(array: T[]) => {
 	}
 }
 
-let arr = Fn.new()
+let arr = Range.new()
 	.range()
 	.take(10)
 

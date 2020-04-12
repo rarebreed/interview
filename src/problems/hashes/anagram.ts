@@ -11,16 +11,17 @@ const isAnagram = (s1: string, s2: string): boolean => {
 	let s2arr = Array.from(s2);
 
 	const reducer = (acc: Map<string, number>, n: string) => {
-		let val = acc.get(n);
-		if (val !== undefined) {
-			acc.set(n, val + 1)
+		let count = acc.get(n);
+		if (count !== undefined) {
+			acc.set(n, count + 1)  // We have seen this letter, so increment count
 		} else {
-			acc.set(n, 1);
+			acc.set(n, 1);  // We haven't seen this letter, start at 1
 		}
 
 		return acc;
 	}
 
+	// Create a map of letter to occurrences, ignoring spaces and capitalization
 	let s1map = s1arr
 		.filter(i => i !== " ")
 		.map(c => c.toLowerCase())
