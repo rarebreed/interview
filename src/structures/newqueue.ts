@@ -40,7 +40,7 @@ export class Queue<T> {
 
   peek = () => {
     if (!this.isEmpty()) {
-      return Option.Some(this.queue[this.tail])
+      return Option.Some(this.queue[this.head])
     } else {
       return Option.None<T>()
     }

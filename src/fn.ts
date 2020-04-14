@@ -111,6 +111,57 @@ export function* zip<T1, T2>(it1: Iterable<T1>, it2: Iterable<T2>) {
 	}
 }
 
+export function* zip3<T1, T2, T3>(it1: Iterable<T1>, it2: Iterable<T2>, it3: Iterable<T3>) {
+	let gen1 = toGen(it1);
+	let gen2 = toGen(it2);
+	let gen3 = toGen(it3);
+
+	let loop = true;
+	while (loop) {
+		let n = gen1.next();
+		let m = gen2.next();
+		let o = gen3.next();
+
+		for (let gen of [n, m, o]) {
+			if (gen.done === undefined || gen.done === true) {
+				loop = false;
+				break;
+			} 
+		}
+		if (!loop) break
+
+		yield [n.value, m.value, o.value] as [T1, T2, T3]
+	}
+}
+
+/**
+ * Allows multiple iterables
+ * 
+ * Unfortunately, we can no longer know the type of what is returned.  The only way to achieve this
+ * will be to declare zip3<T1, T2, T3>, zip4<T1, T2, T3, T4> etc.
+ * @param its 
+ */
+export function* zipp(...its: Iterable<unknown>[]) {
+	let gens = its.map(it => toGen(it));
+
+	let loop = true;
+	while (loop) {
+		let nextVals = gens.map(gen => gen.next())
+		for (let val of nextVals) {
+			if (val.done === undefined || val.done === true) {
+				loop = false;
+				break;
+			}
+		}
+		if (!loop) {
+			break;
+		}
+
+		let vals = nextVals.map(v => v.value);
+		yield vals
+	}
+}
+
 export interface MakeNumOptions {
 	negative?: boolean,
 	exclusive?: boolean,
@@ -464,6 +515,9 @@ export const none = (): None => {
 
 export type Maybe<T> = Some<T> | None;
 
+type Lift<T, R> = Option<(t: T) => R>
+
+
 /**
  * An Option type to replace T | null
  * 
@@ -473,10 +527,10 @@ export type Maybe<T> = Some<T> | None;
  * way though.
  */
 export class Option<T> {
-	#inner: Maybe<T>;
+	inner: Maybe<T>;
 
 	constructor(inner: Maybe<T>) {
-		this.#inner = inner
+		this.inner = inner
 	}
 
 	static new = <T>(inner: Maybe<T>) => {
@@ -497,54 +551,64 @@ export class Option<T> {
 	}
 
 	tap = (fn: (t: T) => void): Option<T> => {
-		switch (this.#inner.kind) {
+		switch (this.inner.kind) {
 			case "None":
 				return this;
 			case "Some":
-				fn(this.#inner.value);
+				fn(this.inner.value);
 				return this;
 		}
 	}
 
 	map = <R>(fn: (t: T) => R): Option<R> => {
-		switch (this.#inner.kind) {
+		switch (this.inner.kind) {
 			case "None":
-				return new Option<R>(none())
+				return Option.None<R>()
 			case "Some":
-				let result = fn(this.#inner.value);
-				return Option.Some(result)
+				let result = fn(this.inner.value);
+				return Option.Maybe(result)
 		}
 	}
 
 	flatMap = <R>(fn: (t: T) => Option<R>): Option<R> => {
-		switch (this.#inner.kind) {
+		switch (this.inner.kind) {
 			case "None":
 				return Option.None()
 			case "Some":
-				return fn(this.#inner.value);
+				return fn(this.inner.value);
 		}
 	}
 
-	lift = <R>(fn: <T, R>(t: Option<T>) => Option<R>): Option<R> => {
-		switch (this.#inner.kind) {
+	apply = <R>(fn: <T, R>(t: Option<T>) => Option<R>): Option<R> => {
+		return fn(this)
+	}
+
+	lift = <R>(fn: Option<(t: T) => R>) => {
+		switch (this.inner.kind) {
 			case "None":
-				return fn(Option.None())
+				return Option.None<R>()
 			case "Some":
-				return fn(Option.Some(this.#inner.value))
+				let value = this.inner.value;
+				switch (fn.kind()) {
+					case "None":
+						return Option.None<R>()
+					case "Some":
+						return fn.map(cb => cb(value))
+				}
 		}
 	}
 
 	filter = (fn: (t: T) => boolean) => {
-		switch (this.#inner.kind) {
+		switch (this.inner.kind) {
 			case "None":
 				return Option.None<boolean>();
 			case "Some":
-				return Option.Maybe(fn(this.#inner.value))
+				return Option.Maybe(fn(this.inner.value))
 		}
 	}
 
 	or = (other: Option<T> | T | null): Option<T> => {
-		switch (this.#inner.kind) {
+		switch (this.inner.kind) {
 			case "None":
 				if (other instanceof Option) {
 					return other
@@ -565,7 +629,7 @@ export class Option<T> {
 	 * Option<T>, whereas mapOr can have a function return Option<R>
 	 */
 	orElse = (fn: () => T | null) => {
-		switch (this.#inner.kind) {
+		switch (this.inner.kind) {
 			case "None":
 				let result = fn();
 				if (result === null) {
@@ -586,12 +650,12 @@ export class Option<T> {
 	 */
 	mapOr = <R>(other: T, fn: (t: T) => R | null): Option<R> => {
 		let result: R | null;
-		switch (this.#inner.kind) {
+		switch (this.inner.kind) {
 			case "None":
 				result = fn(other);
 				break;
 			case "Some":
-				result = fn(this.#inner.value);
+				result = fn(this.inner.value);
 				break;
 		}
 
@@ -608,11 +672,11 @@ export class Option<T> {
 	 * Will throw an error if the underlying value is null or undefined
 	 */
 	expect = (msg: string): T => {
-		switch (this.#inner.kind) {
+		switch (this.inner.kind) {
 			case "None":
 				throw new Error(msg);
 			case "Some":
-				return this.#inner.value;
+				return this.inner.value;
 		}
 	}
 
@@ -620,12 +684,17 @@ export class Option<T> {
 	 * Returns the underlying inner value
 	 */
 	unwrap = () => {
-		return this.#inner
+		return this.inner
 	}
 
-	isSome = () => this.#inner.kind !== "None";
+	isSome = () => this.inner.kind !== "None";
 
-	isNone = () => this.#inner.kind === "Some";
+	isNone = () => this.inner.kind === "Some";
 
-	kind = () => this.#inner.kind
+	kind = () => this.inner.kind
+}
+
+export const pure = <T>(wrapped: T): Option<T> => {
+	if (wrapped === null || wrapped === undefined) return Option.None<T>()
+	else return Option.Some(wrapped)
 }

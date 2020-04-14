@@ -10,7 +10,6 @@ let graph: KeyValType<number> = [
   [7, [8]]
 ]
 
-
 // let res = bfs(g, 1);
 // console.log(res)
 
